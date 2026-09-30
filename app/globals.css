@@ -3,21 +3,22 @@
 /* ============================================================
    PAPER, INK, TYPE
 
-   The page IS the business card: cool, pale stock edge to edge,
-   soft charcoal ink, a strong pressed-letterpress deboss, and
-   one classic serif (with a genuine small-caps companion family)
-   for everything. No color beyond the ink easter egg (added
-   later). Light only: this design has no dark variant, since
-   dark mode would mean ink on ink, which isn't the object being
-   represented.
+   The page IS the business card: bone-colored stock edge to
+   edge (warm, slightly grayish ivory, not bright cream and not
+   cool gray), soft charcoal ink, a strong pressed-letterpress
+   deboss, and one classic serif (with a genuine small-caps
+   companion family) for everything. No color beyond the ink
+   easter egg (added later). Light only: this design has no dark
+   variant, since dark mode would mean ink on ink, which isn't
+   the object being represented.
    ============================================================ */
 
 :root {
-  --paper: #e9e7e1;
-  --ink: #3a3733;
-  --ink-soft: #5c5750;
-  --hairline: rgba(58, 55, 51, 0.22);
-  --hairline-strong: rgba(58, 55, 51, 0.4);
+  --paper: #e7e0d2;
+  --ink: #38332c;
+  --ink-soft: #5a5348;
+  --hairline: rgba(56, 51, 44, 0.22);
+  --hairline-strong: rgba(56, 51, 44, 0.4);
 }
 
 html {
@@ -26,12 +27,20 @@ html {
 
 body {
   background-color: var(--paper);
-  /* Paper-fiber grain: an inline SVG turbulence filter as a data: URI, not
-     a remote image (already covered by the CSP's img-src 'self' data:).
-     Two stacked turbulence passes at different frequencies to read as a
-     directional cotton-fiber texture rather than uniform digital noise. */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.01 1.1' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.22 0 0 0 0 0.21 0 0 0 0 0.19 0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 320px 320px;
+  /* Layered background, bottom to top:
+     1. Paper-fiber grain: an inline SVG turbulence filter as a data: URI
+        (covered by the CSP's img-src 'self' data:), tuned to read as
+        directional cotton-fiber texture rather than uniform digital noise.
+     2. A faint watermark: a large, barely-visible mark repeated softly
+        across the stock, the way real watermarked paper only shows a
+        pattern under raking light or close inspection, never as a loud
+        graphic.
+     Both are data: URIs, no remote image, no CSP change needed. */
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='720' height='720'%3E%3Ctext x='50%25' y='50%25' font-family='Georgia,serif' font-size='220' fill='rgba(56,51,44,0.008)' text-anchor='middle' dominant-baseline='middle' transform='rotate(-18 360 360)'%3EIP%3C/text%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.01 1.1' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.22 0 0 0 0 0.2 0 0 0 0 0.17 0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 720px 720px, 320px 320px;
+  background-repeat: repeat, repeat;
   color: var(--ink);
   font-family: var(--font-vollkorn), Georgia, "Times New Roman", serif;
   font-size: 18px;
@@ -39,6 +48,21 @@ body {
   font-variant-numeric: oldstyle-nums;
   min-height: 100vh;
   width: 100%;
+}
+
+/* Paper edge thickness: a soft inset shadow fixed to the viewport (not the
+   scrollable document), as if the stock itself has a slight bevel where it
+   meets whatever it's sitting on, rather than reading as a flat, infinitely
+   thin color fill. A fixed overlay, not a body box-shadow, so it stays at
+   the true viewport edge at every scroll position, not just the very top
+   and bottom of the whole page. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(56, 51, 44, 0.08), inset 0 0 48px rgba(56, 51, 44, 0.06);
 }
 
 @media (max-width: 640px) {
