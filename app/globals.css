@@ -1,26 +1,356 @@
 @import "tailwindcss";
 
+/* ============================================================
+   PAPER, INK, TYPE
+
+   The page IS the business card: warm bone/eggshell card stock
+   edge to edge, warm near-black ink, one classic serif (with a
+   genuine small-caps companion family) for everything. No color
+   beyond the ink easter egg (added later). Light only: this
+   design has no dark variant, since dark mode would mean black
+   ink on black paper, which isn't the object being represented.
+   ============================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --paper: #f0ece2;
+  --ink: #231f1c;
+  --ink-soft: #4d453e;
+  --hairline: rgba(35, 31, 28, 0.22);
+  --hairline-strong: rgba(35, 31, 28, 0.4);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: light only;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--paper);
+  /* Subtle paper grain: an inline SVG noise filter as a data: URI, not a
+     remote image. Already covered by the CSP's img-src 'self' data:. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.14 0 0 0 0 0.12 0 0 0 0 0.11 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  color: var(--ink);
+  font-family: var(--font-cormorant), Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  line-height: 1.7;
+  font-variant-numeric: oldstyle-nums;
+  min-height: 100vh;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  body {
+    font-size: 17px;
+  }
+}
+
+h1, h2, h3 {
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-weight: 600;
+}
+
+a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+/* ============================================================
+   SMALL CAPS
+   Cormorant SC: a distinct font file drawn as small caps, not
+   text-transform on the regular family. This is what makes the
+   small caps genuine rather than scaled uppercase.
+   ============================================================ */
+.small-caps {
+  font-family: var(--font-cormorant-sc), var(--font-cormorant), Georgia, serif;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}
+
+/* ============================================================
+   DEBOSS
+   A soft highlight below and a faint shadow above, like type
+   pressed into the paper. Reserved for card-face text and
+   section titles; never applied to body paragraphs.
+   ============================================================ */
+.deboss {
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.55),
+    0 -1px 0 rgba(35, 31, 28, 0.18);
+}
+
+/* ============================================================
+   LINKS
+   Plain small-caps text. A thin underline appears on hover, and
+   a visible focus ring on keyboard focus. No filled buttons, no
+   boxes, no pills.
+   ============================================================ */
+.card-link {
+  font-family: var(--font-cormorant-sc), var(--font-cormorant), Georgia, serif;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  padding-bottom: 1px;
+}
+.card-link:hover {
+  border-bottom-color: var(--ink);
+}
+.card-link:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+  border-radius: 1px;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+*:focus {
+  outline: none;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* ============================================================
+   CARD FLIP MECHANICS
+   Both faces are always in the DOM. The 3D rotate is done with a
+   real perspective + rotateY on the inner wrapper; the back face
+   is pre-rotated 180deg so it reads right-side-up once flipped.
+   Under reduced motion, .is-reduced-motion swaps the transform
+   for a plain opacity crossfade (guarded here, not just by the
+   global backstop above, since this needs an actual substitute
+   animation, not merely "no animation").
+   ============================================================ */
+.card-flip-stage {
+  position: relative;
+  width: 100%;
+  height: 100svh;
+  perspective: 2000px;
+}
+.card-flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.4, 0.1, 0.2, 1);
+}
+.card-flip-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.card-face-back {
+  transform: rotateY(180deg);
+}
+
+/* Reduced motion: no rotation at all, crossfade via opacity/visibility. */
+.card-flip-inner.is-reduced-motion {
+  transition: none;
+  transform: none !important;
+}
+.card-flip-inner.is-reduced-motion .card-face {
+  position: absolute;
+  transform: none !important;
+  transition: opacity 0.15s linear;
+}
+.card-flip-inner.is-reduced-motion .card-face[aria-hidden="true"] {
+  opacity: 0;
+  pointer-events: none;
+}
+.card-flip-inner.is-reduced-motion .card-face[aria-hidden="false"] {
+  opacity: 1;
+  position: relative;
+}
+
+/* ============================================================
+   CARD PANEL (shared by front and back)
+   Exactly 100svh, generous margins from every edge.
+   ============================================================ */
+.card-panel {
+  position: relative;
+  width: 100%;
+  height: 100svh;
+  padding: 6vw 6vw;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+/* ---- Front: four-part layout ---- */
+.card-corner {
+  grid-row: 1;
+}
+.card-corner-tl {
+  justify-self: start;
+}
+.card-corner-tr {
+  justify-self: end;
+}
+.card-corner-tl,
+.card-corner-tr {
+  position: absolute;
+  top: 6vw;
+}
+.card-corner-tl { left: 6vw; }
+.card-corner-tr { right: 6vw; }
+
+.card-center {
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1.2rem;
+}
+.card-name {
+  font-size: clamp(2.6rem, 8vw, 5.5rem);
+  line-height: 1;
+  margin: 0;
+}
+.card-focus-line {
+  font-size: clamp(0.95rem, 1.6vw, 1.2rem);
+  margin: 0;
+}
+
+.card-bottom {
+  grid-row: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.4rem;
+}
+.card-link-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.4em;
+  font-size: clamp(0.85rem, 1.4vw, 1rem);
+}
+.card-link-row-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4em;
+}
+.card-link-row-sep {
+  color: var(--ink-soft);
+}
+.card-affordances {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+.card-affordance {
+  font-size: inherit;
+  letter-spacing: 0.08em;
+}
+.card-affordance-sep {
+  width: 1px;
+  height: 0.9em;
+  background: var(--hairline-strong);
+}
+
+/* ---- Back: centered content ---- */
+.card-panel-back {
+  grid-template-rows: 1fr auto;
+}
+.card-back-content {
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 1.6rem;
+  max-width: 60ch;
+  margin: 0 auto;
+}
+.card-back-intro {
+  font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+  line-height: 1.7;
+  margin: 0;
+}
+.card-back-currently {
+  font-size: clamp(0.85rem, 1.3vw, 1rem);
+  margin: 0;
+}
+.card-bottom-back {
+  grid-row: 2;
+  display: flex;
+  justify-content: center;
+}
+
+/* ============================================================
+   MOBILE RESTACK (< 640px)
+   Same four pieces, restacked vertically inside 100svh: email at
+   top, university under it, name/focus centered, links at the
+   bottom (wrapping to two lines if needed). No shrinking text
+   below readable sizes to force a fit.
+   ============================================================ */
+@media (max-width: 640px) {
+  .card-panel {
+    padding: 8vw 6vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .card-corner-tl,
+  .card-corner-tr {
+    position: static;
+    text-align: center;
+  }
+  .card-corner-tr > div {
+    text-align: center;
+  }
+  .card-center {
+    flex: 1;
+  }
+  .card-name {
+    font-size: clamp(2.2rem, 11vw, 3rem);
+  }
+}
+
+/* ============================================================
+   REDUCED MOTION
+   Every animation added in later stages (card flip, section
+   fade-in, ink spatters) must check this and either disable or
+   substitute a crossfade/instant state. This block is the
+   backstop; each feature also guards itself individually where
+   the substitution isn't simply "no animation."
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================
+   PRINT
+   Clean black-on-white pages: no grain, no deboss, no motion.
+   ============================================================ */
+@media print {
+  body {
+    background: #ffffff;
+    background-image: none;
+    color: #000000;
+  }
+  .deboss {
+    text-shadow: none;
+  }
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
 }
