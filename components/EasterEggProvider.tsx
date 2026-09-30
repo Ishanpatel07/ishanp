@@ -30,7 +30,7 @@ export function EasterEggProvider({ children }: { children: React.ReactNode }) {
   return (
     <EasterEggContext.Provider value={{ inkSpatter }}>
       {children}
-      {inkSpatter.active && <InkSpatter />}
+      {inkSpatter.active && <InkSpatter seed={inkSpatter.seed} />}
     </EasterEggContext.Provider>
   );
 }

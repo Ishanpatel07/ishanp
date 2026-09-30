@@ -29,10 +29,13 @@ html {
 body {
   background-color: var(--paper);
   /* Layered background, first-listed paints on top:
-     1. A watermark: two marks per tile, at different rotations and sizes,
-        subtle enough to notice on a closer look rather than read as a
-        pattern. Listed first (on top) so the grain layer below doesn't
-        wash it out. Reduced from an earlier pass that read as overdone.
+     1. A watermark: two marks per tile. Rotation angles are not arbitrary:
+        210deg is where a clock's hour hand points at 10 o'clock, 60deg is
+        where the minute hand points at 25 minutes past. Random-feeling but
+        derived from a precise, symmetric reference rather than eyeballed
+        numbers, per the user's "hour hand at 10, minute hand at 25" ask.
+        Subtle enough to notice on a closer look, not read as a pattern.
+        Listed first (on top) so the grain layer below doesn't wash it out.
      2. Paper-fiber grain: an inline SVG turbulence filter as a data: URI
         (covered by the CSP's img-src 'self' data:), tuned to read as
         directional cotton-fiber texture rather than uniform digital noise.
@@ -41,7 +44,7 @@ body {
         flat, single-tone fill.
      All data: URIs or gradients, no remote image, no CSP change needed. */
   background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='1000'%3E%3Ctext x='250' y='320' font-family='Georgia,serif' font-size='170' fill='rgba(56,51,44,0.022)' text-anchor='middle' transform='rotate(-20 250 320)'%3EIP%3C/text%3E%3Ctext x='700' y='760' font-family='Georgia,serif' font-size='140' fill='rgba(56,51,44,0.016)' text-anchor='middle' transform='rotate(14 700 760)'%3EIP%3C/text%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='1000'%3E%3Ctext x='250' y='320' font-family='Georgia,serif' font-size='170' fill='rgba(56,51,44,0.022)' text-anchor='middle' transform='rotate(210 250 320)'%3EIP%3C/text%3E%3Ctext x='700' y='760' font-family='Georgia,serif' font-size='140' fill='rgba(56,51,44,0.016)' text-anchor='middle' transform='rotate(60 700 760)'%3EIP%3C/text%3E%3C/svg%3E"),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.01 1.1' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.22 0 0 0 0 0.2 0 0 0 0 0.17 0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
     radial-gradient(ellipse at 50% 42%, var(--paper-nimbus) 0%, var(--paper) 72%);
   background-size: 1000px 1000px, 320px 320px, 100% 100%;
@@ -399,10 +402,13 @@ a {
 
 /* ============================================================
    INK EASTER EGG
-   Deep-red spatters (irregular blobs, thin drip tails, and a
-   scatter of fine mist droplets) overlaid on the front screen,
-   drawn as SVG rather than flat circles. Purely visual: no text,
-   sound, or hint attached.
+   Procedural SVG blood splatter: irregular jagged blobs (organic
+   edges via feTurbulence/feDisplacementMap), a radial dark-core
+   gradient, satellite droplets, cast-off streaks, and drips that
+   slide down over ~1.5s. multiply blend mode plus a feathered
+   underlay so it reads as soaked into the paper. Purely visual:
+   no text, sound, or hint attached. pointer-events: none on the
+   whole layer keeps every link fully clickable underneath it.
    ============================================================ */
 .ink-spatter-layer {
   position: fixed;
@@ -414,17 +420,36 @@ a {
   width: 100%;
   height: 100%;
 }
-.ink-spatter-blob {
-  fill: #7d0f0f;
+
+@keyframes ink-drip-slide {
+  0% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
 }
-.ink-spatter-drip {
-  stroke: #7d0f0f;
-  fill: none;
-  stroke-linecap: round;
+.ink-drip-animated {
+  animation: ink-drip-slide 1.5s cubic-bezier(0.3, 0.6, 0.4, 1) forwards;
 }
-.ink-spatter-mist {
-  fill: #7d0f0f;
-  opacity: 0.75;
+.ink-drip-static {
+  /* Reduced motion: show the final, fully-run state instantly, no
+     animation to skip. */
+  transform: scaleY(1);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ink-drip-animated {
+    animation: none;
+    transform: scaleY(1);
+    opacity: 1;
+  }
 }
 
 /* ============================================================

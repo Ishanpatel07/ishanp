@@ -11,19 +11,28 @@ import { useState } from "react";
    synchronously-dispatched clicks in the same event batch each
    still see the latest count rather than reading a stale value
    captured before the batch started.
+
+   `seed` increments on every activation, so each trigger renders
+   a different splatter pattern (InkSpatter derives all its
+   randomness from this one number, deterministically, so the
+   pattern is stable for the lifetime of one activation but
+   different from the last one).
    ============================================================ */
 export function useInkSpatter() {
-  const [state, setState] = useState({ active: false, clicks: 0 });
+  const [state, setState] = useState({ active: false, clicks: 0, seed: 1 });
 
   function trigger() {
     setState((prev) => {
       if (prev.active) {
-        return { active: false, clicks: 0 };
+        return { active: false, clicks: 0, seed: prev.seed };
       }
       const next = prev.clicks + 1;
-      return next >= 3 ? { active: true, clicks: 0 } : { active: false, clicks: next };
+      if (next >= 3) {
+        return { active: true, clicks: 0, seed: prev.seed + 1 };
+      }
+      return { active: false, clicks: next, seed: prev.seed };
     });
   }
 
-  return { active: state.active, trigger };
+  return { active: state.active, seed: state.seed, trigger };
 }
