@@ -14,24 +14,24 @@ export const person = {
   major: "Computer Information Systems",
 };
 
-// Stage 2 will present 3 options for each of these; a value is needed now
-// so Stage 1 has real text to lay out and measure against, not lorem ipsum.
-// Marked as a placeholder pick, not a final decision.
-export const focusLine = "Computer vision and edge ML, heading into AI security.";
+// Confirmed with the user: no "AI security" framing in the focus line, since
+// that's a direction, not current expertise or a credential held today.
+export const focusLine = "Cybersecurity student. Building with ML and computer vision.";
 
 export const currentlyLine = "Running finance for Hacklanta II (Oct 9-11).";
 
 // Stage 2 will present 3 intro options; this is a placeholder for Stage 1's
-// layout only.
+// layout only. AI security appears once here, explicitly framed as a
+// long-term goal ("eventually"), not present-tense work or expertise,
+// per the user's correction.
 export const introText =
-  "I build computer vision and edge ML systems that run on real hardware. I'm heading toward AI security: how models fail, how they're attacked, and how to make them robust. Alongside that, I run finance for a 1,000-plus person hackathon.";
+  "I build computer vision and edge ML systems that run on real hardware, and I run finance for a 1,000-plus person hackathon. Eventually, I want to move into AI security: how models fail, how they're attacked, and how to make them robust.";
 
 export const cardFrontLinks = [
   { label: "Resume", href: "/Ishan_Patel_Resume.pdf" },
   { label: "GitHub", href: "https://github.com/Ishanpatel07" },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/ishanpatel09/" },
   { label: "Coffee Chat", href: "https://calendly.com/ishan-patel2807/30min" },
-  { label: "ishanp.me", href: "https://ishanp.me" },
 ];
 
 export const cardBackLinks = [

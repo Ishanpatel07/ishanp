@@ -5,9 +5,11 @@ import { introText, currentlyLine, cardBackLinks } from "@/data/content";
 
 /* ============================================================
    CardBack
-   Centered, generous whitespace: the 3-sentence intro, the fixed
-   Currently line, three small-caps links, and "Turn back" at the
-   bottom. Same paper, same margins as the front.
+   Centered intro and Currently line in the middle zone. The
+   contact link row sits in the same grid row (and therefore the
+   same on-screen position) as the front's primary link row, with
+   "Turn back" beneath it in the same spot "Turn over" occupies
+   on the front. Same paper, same margins as the front.
    ============================================================ */
 
 export function CardBack({
@@ -24,7 +26,9 @@ export function CardBack({
       <div className="card-back-content">
         <p className="card-back-intro">{introText}</p>
         <p className="small-caps card-back-currently">{currentlyLine}</p>
+      </div>
 
+      <div className="card-bottom card-bottom-back">
         <nav className="card-link-row" aria-label="Contact links">
           {cardBackLinks.map((link, i) => (
             <span key={link.href} className="card-link-row-item">
@@ -44,12 +48,12 @@ export function CardBack({
             </span>
           ))}
         </nav>
-      </div>
 
-      <div className="card-bottom card-bottom-back">
-        <button ref={flipButtonRef} type="button" className="card-link card-affordance" onClick={onFlip}>
-          Turn back
-        </button>
+        <div className="card-affordances">
+          <button ref={flipButtonRef} type="button" className="card-link card-affordance" onClick={onFlip}>
+            Turn back
+          </button>
+        </div>
       </div>
     </div>
   );

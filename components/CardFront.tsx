@@ -2,6 +2,7 @@
 
 import { RefObject } from "react";
 import { person, focusLine, cardFrontLinks } from "@/data/content";
+import { useEasterEggs } from "@/components/EasterEggProvider";
 
 /* ============================================================
    CardFront
@@ -27,6 +28,8 @@ export function CardFront({
   onFlip: () => void;
   inert: boolean;
 }) {
+  const { inkSpatter } = useEasterEggs();
+
   return (
     <div className="card-panel" inert={inert || undefined}>
       <div className="card-corner card-corner-tl">
@@ -34,6 +37,16 @@ export function CardFront({
           {person.email}
         </a>
       </div>
+
+      <button
+        type="button"
+        className="card-corner-trigger"
+        onClick={inkSpatter.trigger}
+        aria-label="hidden detail"
+        tabIndex={-1}
+      >
+        Inspired by American Psycho
+      </button>
 
       <div className="card-corner card-corner-tr">
         <div className="small-caps deboss" style={{ textAlign: "right", lineHeight: 1.4 }}>

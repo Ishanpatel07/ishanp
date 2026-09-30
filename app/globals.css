@@ -4,17 +4,18 @@
    PAPER, INK, TYPE
 
    The page IS the business card: bone-colored stock edge to
-   edge (warm, slightly grayish ivory, not bright cream and not
-   cool gray), soft charcoal ink, a strong pressed-letterpress
-   deboss, and one classic serif (with a genuine small-caps
-   companion family) for everything. No color beyond the ink
-   easter egg (added later). Light only: this design has no dark
+   edge, with a soft pale-nimbus glow toward the center (a subtle
+   luminous cast, not a flat fill), soft charcoal ink, a strong
+   pressed-letterpress deboss, and one classic serif (with a
+   genuine small-caps companion family) for everything. No color
+   beyond the ink easter egg. Light only: this design has no dark
    variant, since dark mode would mean ink on ink, which isn't
    the object being represented.
    ============================================================ */
 
 :root {
   --paper: #e7e0d2;
+  --paper-nimbus: #ece6d9;
   --ink: #38332c;
   --ink-soft: #5a5348;
   --hairline: rgba(56, 51, 44, 0.22);
@@ -27,20 +28,26 @@ html {
 
 body {
   background-color: var(--paper);
-  /* Layered background, bottom to top:
-     1. Paper-fiber grain: an inline SVG turbulence filter as a data: URI
+  /* Layered background, first-listed paints on top:
+     1. A watermark, drawn as several instances at different rotations,
+        positions, and opacities within one repeating tile (not one
+        uniform mark), so it reads as a slightly irregular press mark
+        rather than a perfectly regular pattern. Listed first (on top)
+        so the grain layer below doesn't wash it out.
+     2. Paper-fiber grain: an inline SVG turbulence filter as a data: URI
         (covered by the CSP's img-src 'self' data:), tuned to read as
         directional cotton-fiber texture rather than uniform digital noise.
-     2. A faint watermark: a large, barely-visible mark repeated softly
-        across the stock, the way real watermarked paper only shows a
-        pattern under raking light or close inspection, never as a loud
-        graphic.
-     Both are data: URIs, no remote image, no CSP change needed. */
+     3. A soft pale-nimbus radial glow centered on the viewport, so the
+        stock reads as gently luminous toward the middle rather than a
+        flat, single-tone fill.
+     All data: URIs or gradients, no remote image, no CSP change needed. */
   background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='720' height='720'%3E%3Ctext x='50%25' y='50%25' font-family='Georgia,serif' font-size='220' fill='rgba(56,51,44,0.008)' text-anchor='middle' dominant-baseline='middle' transform='rotate(-18 360 360)'%3EIP%3C/text%3E%3C/svg%3E"),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.01 1.1' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.22 0 0 0 0 0.2 0 0 0 0 0.17 0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 720px 720px, 320px 320px;
-  background-repeat: repeat, repeat;
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='900'%3E%3Ctext x='180' y='260' font-family='Georgia,serif' font-size='190' fill='rgba(56,51,44,0.05)' text-anchor='middle' transform='rotate(-22 180 260)'%3EIP%3C/text%3E%3Ctext x='650' y='180' font-family='Georgia,serif' font-size='150' fill='rgba(56,51,44,0.035)' text-anchor='middle' transform='rotate(11 650 180)'%3EIP%3C/text%3E%3Ctext x='420' y='620' font-family='Georgia,serif' font-size='230' fill='rgba(56,51,44,0.055)' text-anchor='middle' transform='rotate(-7 420 620)'%3EIP%3C/text%3E%3Ctext x='760' y='740' font-family='Georgia,serif' font-size='140' fill='rgba(56,51,44,0.04)' text-anchor='middle' transform='rotate(24 760 740)'%3EIP%3C/text%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.01 1.1' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.22 0 0 0 0 0.2 0 0 0 0 0.17 0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse at 50% 42%, var(--paper-nimbus) 0%, var(--paper) 72%);
+  background-size: 900px 900px, 320px 320px, 100% 100%;
+  background-repeat: repeat, repeat, no-repeat;
+  background-attachment: scroll, scroll, fixed;
   color: var(--ink);
   font-family: var(--font-vollkorn), Georgia, "Times New Roman", serif;
   font-size: 18px;
@@ -204,13 +211,16 @@ a {
 
 /* ============================================================
    CARD PANEL (shared by front and back)
-   Exactly 100svh, generous margins from every edge.
+   Exactly 100svh. Header pulled up, footer/link-row pushed down
+   (grid rows weighted so the center zone doesn't dominate), and
+   a bigger type scale with tighter vertical rhythm so the card
+   reads as filled rather than mostly empty paper.
    ============================================================ */
 .card-panel {
   position: relative;
   width: 100%;
   height: 100svh;
-  padding: 6vw 6vw;
+  padding: 3.5vw 6vw 4vw;
   display: grid;
   grid-template-rows: auto 1fr auto;
 }
@@ -228,7 +238,7 @@ a {
 .card-corner-tl,
 .card-corner-tr {
   position: absolute;
-  top: 6vw;
+  top: 3.5vw;
 }
 .card-corner-tl { left: 6vw; }
 .card-corner-tr { right: 6vw; }
@@ -240,20 +250,21 @@ a {
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: 1.2rem;
+  gap: 1.4rem;
 }
 .card-name {
-  font-size: clamp(2.6rem, 8vw, 5.5rem);
+  font-size: clamp(3.2rem, 9.5vw, 6.6rem);
   line-height: 1;
   margin: 0;
 }
 .card-focus-line {
-  font-size: clamp(0.95rem, 1.6vw, 1.2rem);
+  font-size: clamp(1.05rem, 1.9vw, 1.35rem);
   margin: 0;
 }
 
 .card-bottom {
   grid-row: 3;
+  align-self: end;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -292,12 +303,14 @@ a {
   background: var(--hairline-strong);
 }
 
-/* ---- Back: centered content ---- */
+/* ---- Back: centered content, contact row pinned to the same grid row
+   (grid-row: 3, same padding/position as the front's link row) so both
+   faces share one footer position. ---- */
 .card-panel-back {
-  grid-template-rows: 1fr auto;
+  grid-template-rows: auto 1fr auto;
 }
 .card-back-content {
-  grid-row: 1;
+  grid-row: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -308,7 +321,7 @@ a {
   margin: 0 auto;
 }
 .card-back-intro {
-  font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+  font-size: clamp(1.1rem, 1.9vw, 1.4rem);
   line-height: 1.7;
   margin: 0;
 }
@@ -317,9 +330,65 @@ a {
   margin: 0;
 }
 .card-bottom-back {
-  grid-row: 2;
+  grid-row: 3;
+  align-self: end;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.4rem;
+}
+
+/* ============================================================
+   CORNER EASTER-EGG TRIGGER
+   Small, quiet, bottom-right corner text. Not selectable (so a
+   triple-click doesn't select the text instead of just firing
+   the click handler), no visible affordance beyond normal link
+   hover. Three clicks trigger the ink-spatter effect elsewhere.
+   ============================================================ */
+.card-corner-trigger {
+  position: absolute;
+  bottom: 3.5vw;
+  right: 6vw;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  opacity: 0.55;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+.card-corner-trigger:hover {
+  opacity: 0.85;
+}
+.card-corner-trigger:focus-visible {
+  outline: 1px solid var(--ink-soft);
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .card-corner-trigger {
+    display: none;
+  }
+}
+
+/* ============================================================
+   INK EASTER EGG
+   Flat, matte, deep-red spatters overlaid on the front screen.
+   Purely visual: no text, sound, or hint attached.
+   ============================================================ */
+.ink-spatter-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+}
+.ink-spatter {
+  position: absolute;
+  background: #6e0f0f;
+  opacity: 0.88;
 }
 
 /* ============================================================
@@ -331,7 +400,7 @@ a {
    ============================================================ */
 @media (max-width: 640px) {
   .card-panel {
-    padding: 8vw 6vw;
+    padding: 7vw 6vw 8vw;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -348,7 +417,7 @@ a {
     flex: 1;
   }
   .card-name {
-    font-size: clamp(2.2rem, 11vw, 3rem);
+    font-size: clamp(2.4rem, 12vw, 3.4rem);
   }
 }
 
@@ -381,6 +450,10 @@ a {
   }
   .deboss {
     text-shadow: none;
+  }
+  .card-corner-trigger,
+  .ink-spatter-layer {
+    display: none;
   }
   * {
     animation: none !important;
