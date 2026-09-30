@@ -8,10 +8,12 @@ import { useEasterEggs } from "@/components/EasterEggProvider";
    CardFront
    The classic four-part card layout at viewport scale: email top
    left, university top right, name and focus line dead center,
-   link row on the bottom edge, with "Turn over" / "Scroll" as
-   quiet affordances just above it. Exactly 100svh (small viewport
-   height, so mobile browser chrome doesn't clip it) with generous
-   margins from every edge.
+   link row on the bottom edge, with "Turn over" as a quiet
+   affordance just above it. ("Scroll" was removed: there's
+   nothing to scroll to yet below the fold, and it read as a
+   broken promise. It comes back once Stage 2's sections exist.)
+   Exactly 100svh (small viewport height, so mobile browser
+   chrome doesn't clip it) with generous margins from every edge.
 
    `inert` is set natively when this face isn't showing: unlike
    aria-hidden alone, native inert also removes the face from tab
@@ -38,15 +40,20 @@ export function CardFront({
         </a>
       </div>
 
-      <button
-        type="button"
-        className="card-corner-trigger"
-        onClick={inkSpatter.trigger}
-        aria-label="hidden detail"
-        tabIndex={-1}
-      >
-        Inspired by American Psycho
-      </button>
+      <div className="card-corner-trigger-wrap">
+        <button
+          type="button"
+          className="card-corner-trigger"
+          onClick={inkSpatter.trigger}
+          aria-label="hidden detail"
+          tabIndex={-1}
+        >
+          Inspired by American Psycho
+        </button>
+        <span className="card-corner-tooltip" aria-hidden="true">
+          Click thrice for a surprise
+        </span>
+      </div>
 
       <div className="card-corner card-corner-tr">
         <div className="small-caps deboss" style={{ textAlign: "right", lineHeight: 1.4 }}>
@@ -85,10 +92,6 @@ export function CardFront({
           <button ref={flipButtonRef} type="button" className="card-link card-affordance" onClick={onFlip}>
             Turn over
           </button>
-          <span className="card-affordance-sep" aria-hidden="true" />
-          <span className="small-caps card-affordance" style={{ cursor: "default" }}>
-            Scroll
-          </span>
         </div>
       </div>
     </div>

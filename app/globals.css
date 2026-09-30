@@ -3,19 +3,19 @@
 /* ============================================================
    PAPER, INK, TYPE
 
-   The page IS the business card: bone-colored stock edge to
-   edge, with a soft pale-nimbus glow toward the center (a subtle
+   The page IS the business card: eggshell stock edge to edge,
+   with a soft pale-nimbus glow toward the center (a subtle
    luminous cast, not a flat fill), soft charcoal ink, a strong
    pressed-letterpress deboss, and one classic serif (with a
    genuine small-caps companion family) for everything. No color
-   beyond the ink easter egg. Light only: this design has no dark
+   beyond the ink egg. Light only: this design has no dark
    variant, since dark mode would mean ink on ink, which isn't
    the object being represented.
    ============================================================ */
 
 :root {
-  --paper: #e7e0d2;
-  --paper-nimbus: #ece6d9;
+  --paper: #ece7da;
+  --paper-nimbus: #f1ede2;
   --ink: #38332c;
   --ink-soft: #5a5348;
   --hairline: rgba(56, 51, 44, 0.22);
@@ -29,11 +29,10 @@ html {
 body {
   background-color: var(--paper);
   /* Layered background, first-listed paints on top:
-     1. A watermark, drawn as several instances at different rotations,
-        positions, and opacities within one repeating tile (not one
-        uniform mark), so it reads as a slightly irregular press mark
-        rather than a perfectly regular pattern. Listed first (on top)
-        so the grain layer below doesn't wash it out.
+     1. A watermark: two marks per tile, at different rotations and sizes,
+        subtle enough to notice on a closer look rather than read as a
+        pattern. Listed first (on top) so the grain layer below doesn't
+        wash it out. Reduced from an earlier pass that read as overdone.
      2. Paper-fiber grain: an inline SVG turbulence filter as a data: URI
         (covered by the CSP's img-src 'self' data:), tuned to read as
         directional cotton-fiber texture rather than uniform digital noise.
@@ -42,10 +41,10 @@ body {
         flat, single-tone fill.
      All data: URIs or gradients, no remote image, no CSP change needed. */
   background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='900'%3E%3Ctext x='180' y='260' font-family='Georgia,serif' font-size='190' fill='rgba(56,51,44,0.05)' text-anchor='middle' transform='rotate(-22 180 260)'%3EIP%3C/text%3E%3Ctext x='650' y='180' font-family='Georgia,serif' font-size='150' fill='rgba(56,51,44,0.035)' text-anchor='middle' transform='rotate(11 650 180)'%3EIP%3C/text%3E%3Ctext x='420' y='620' font-family='Georgia,serif' font-size='230' fill='rgba(56,51,44,0.055)' text-anchor='middle' transform='rotate(-7 420 620)'%3EIP%3C/text%3E%3Ctext x='760' y='740' font-family='Georgia,serif' font-size='140' fill='rgba(56,51,44,0.04)' text-anchor='middle' transform='rotate(24 760 740)'%3EIP%3C/text%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='1000'%3E%3Ctext x='250' y='320' font-family='Georgia,serif' font-size='170' fill='rgba(56,51,44,0.022)' text-anchor='middle' transform='rotate(-20 250 320)'%3EIP%3C/text%3E%3Ctext x='700' y='760' font-family='Georgia,serif' font-size='140' fill='rgba(56,51,44,0.016)' text-anchor='middle' transform='rotate(14 700 760)'%3EIP%3C/text%3E%3C/svg%3E"),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.01 1.1' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.22 0 0 0 0 0.2 0 0 0 0 0.17 0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
     radial-gradient(ellipse at 50% 42%, var(--paper-nimbus) 0%, var(--paper) 72%);
-  background-size: 900px 900px, 320px 320px, 100% 100%;
+  background-size: 1000px 1000px, 320px 320px, 100% 100%;
   background-repeat: repeat, repeat, no-repeat;
   background-attachment: scroll, scroll, fixed;
   color: var(--ink);
@@ -344,11 +343,15 @@ a {
    triple-click doesn't select the text instead of just firing
    the click handler), no visible affordance beyond normal link
    hover. Three clicks trigger the ink-spatter effect elsewhere.
+   A hover tooltip hints at the interaction without naming what
+   it does.
    ============================================================ */
-.card-corner-trigger {
+.card-corner-trigger-wrap {
   position: absolute;
   bottom: 3.5vw;
   right: 6vw;
+}
+.card-corner-trigger {
   font-size: 0.68rem;
   letter-spacing: 0.06em;
   color: var(--ink-soft);
@@ -368,16 +371,38 @@ a {
   outline-offset: 3px;
 }
 
+.card-corner-tooltip {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 0.5em;
+  font-size: 0.68rem;
+  font-style: italic;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  pointer-events: none;
+}
+.card-corner-trigger-wrap:hover .card-corner-tooltip,
+.card-corner-trigger:focus-visible ~ .card-corner-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 @media (max-width: 640px) {
-  .card-corner-trigger {
+  .card-corner-trigger-wrap {
     display: none;
   }
 }
 
 /* ============================================================
    INK EASTER EGG
-   Flat, matte, deep-red spatters overlaid on the front screen.
-   Purely visual: no text, sound, or hint attached.
+   Deep-red spatters (irregular blobs, thin drip tails, and a
+   scatter of fine mist droplets) overlaid on the front screen,
+   drawn as SVG rather than flat circles. Purely visual: no text,
+   sound, or hint attached.
    ============================================================ */
 .ink-spatter-layer {
   position: fixed;
@@ -385,10 +410,21 @@ a {
   z-index: 40;
   pointer-events: none;
 }
-.ink-spatter {
-  position: absolute;
-  background: #6e0f0f;
-  opacity: 0.88;
+.ink-spatter-svg {
+  width: 100%;
+  height: 100%;
+}
+.ink-spatter-blob {
+  fill: #7d0f0f;
+}
+.ink-spatter-drip {
+  stroke: #7d0f0f;
+  fill: none;
+  stroke-linecap: round;
+}
+.ink-spatter-mist {
+  fill: #7d0f0f;
+  opacity: 0.75;
 }
 
 /* ============================================================
