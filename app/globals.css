@@ -3,20 +3,21 @@
 /* ============================================================
    PAPER, INK, TYPE
 
-   The page IS the business card: warm bone/eggshell card stock
-   edge to edge, warm near-black ink, one classic serif (with a
-   genuine small-caps companion family) for everything. No color
-   beyond the ink easter egg (added later). Light only: this
-   design has no dark variant, since dark mode would mean black
-   ink on black paper, which isn't the object being represented.
+   The page IS the business card: cool, pale stock edge to edge,
+   soft charcoal ink, a strong pressed-letterpress deboss, and
+   one classic serif (with a genuine small-caps companion family)
+   for everything. No color beyond the ink easter egg (added
+   later). Light only: this design has no dark variant, since
+   dark mode would mean ink on ink, which isn't the object being
+   represented.
    ============================================================ */
 
 :root {
-  --paper: #f0ece2;
-  --ink: #231f1c;
-  --ink-soft: #4d453e;
-  --hairline: rgba(35, 31, 28, 0.22);
-  --hairline-strong: rgba(35, 31, 28, 0.4);
+  --paper: #e9e7e1;
+  --ink: #3a3733;
+  --ink-soft: #5c5750;
+  --hairline: rgba(58, 55, 51, 0.22);
+  --hairline-strong: rgba(58, 55, 51, 0.4);
 }
 
 html {
@@ -25,11 +26,14 @@ html {
 
 body {
   background-color: var(--paper);
-  /* Subtle paper grain: an inline SVG noise filter as a data: URI, not a
-     remote image. Already covered by the CSP's img-src 'self' data:. */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.14 0 0 0 0 0.12 0 0 0 0 0.11 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* Paper-fiber grain: an inline SVG turbulence filter as a data: URI, not
+     a remote image (already covered by the CSP's img-src 'self' data:).
+     Two stacked turbulence passes at different frequencies to read as a
+     directional cotton-fiber texture rather than uniform digital noise. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.01 1.1' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.22 0 0 0 0 0.21 0 0 0 0 0.19 0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 320px 320px;
   color: var(--ink);
-  font-family: var(--font-cormorant), Georgia, "Times New Roman", serif;
+  font-family: var(--font-vollkorn), Georgia, "Times New Roman", serif;
   font-size: 18px;
   line-height: 1.7;
   font-variant-numeric: oldstyle-nums;
@@ -44,7 +48,7 @@ body {
 }
 
 h1, h2, h3 {
-  font-family: var(--font-cormorant), Georgia, serif;
+  font-family: var(--font-vollkorn), Georgia, serif;
   font-weight: 600;
 }
 
@@ -55,26 +59,31 @@ a {
 
 /* ============================================================
    SMALL CAPS
-   Cormorant SC: a distinct font file drawn as small caps, not
+   Vollkorn SC: a distinct font file drawn as small caps, not
    text-transform on the regular family. This is what makes the
-   small caps genuine rather than scaled uppercase.
+   small caps genuine rather than scaled uppercase. Tighter
+   letter-spacing than a typical display serif, matching the
+   condensed letterpress register this design is based on.
    ============================================================ */
 .small-caps {
-  font-family: var(--font-cormorant-sc), var(--font-cormorant), Georgia, serif;
-  letter-spacing: 0.06em;
+  font-family: var(--font-vollkorn-sc), var(--font-vollkorn), Georgia, serif;
+  letter-spacing: 0.03em;
   font-weight: 600;
 }
 
 /* ============================================================
    DEBOSS
-   A soft highlight below and a faint shadow above, like type
-   pressed into the paper. Reserved for card-face text and
-   section titles; never applied to body paragraphs.
+   A stronger pressed-into-the-paper effect: a tight dark
+   recession above and a brighter catch-light below, the way ink
+   pressed by a letterpress plate reads under raking light.
+   Reserved for card-face text and section titles; never applied
+   to body paragraphs.
    ============================================================ */
 .deboss {
   text-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.55),
-    0 -1px 0 rgba(35, 31, 28, 0.18);
+    0 1.5px 0 rgba(255, 255, 255, 0.65),
+    0 -1px 0.5px rgba(58, 55, 51, 0.35),
+    0 -1.5px 1px rgba(58, 55, 51, 0.15);
 }
 
 /* ============================================================
@@ -84,8 +93,8 @@ a {
    boxes, no pills.
    ============================================================ */
 .card-link {
-  font-family: var(--font-cormorant-sc), var(--font-cormorant), Georgia, serif;
-  letter-spacing: 0.06em;
+  font-family: var(--font-vollkorn-sc), var(--font-vollkorn), Georgia, serif;
+  letter-spacing: 0.03em;
   font-weight: 600;
   color: var(--ink);
   text-decoration: none;
