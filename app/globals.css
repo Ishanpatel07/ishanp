@@ -208,6 +208,14 @@ a {
   width: 100%;
   height: 100svh;
   perspective: 2000px;
+  /* Mid-rotation the card's perspective projection is briefly wider than
+     the viewport. Without clipping that overflows the document, the
+     browser flashes a horizontal scrollbar, clientWidth drops by the
+     scrollbar's width, and every position: fixed layer (the watermark)
+     gets re-laid-out a few px narrower and visibly jumps, then snaps back
+     when the flip ends. Clipping here costs nothing visually, since the
+     card is exactly viewport-sized at both rest states. */
+  overflow: hidden;
 }
 .card-flip-inner {
   position: relative;
