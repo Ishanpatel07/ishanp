@@ -396,7 +396,7 @@ a {
   bottom: 3.5vw;
   right: 6vw;
   margin: 0;
-  font-size: 0.68rem;
+  font-size: 0.55rem;
   letter-spacing: 0.06em;
   color: var(--ink-soft);
   opacity: 0.55;
@@ -554,7 +554,7 @@ a {
   .card-corner-note {
     bottom: 2vh;
     right: 5vw;
-    font-size: 0.6rem;
+    font-size: 0.5rem;
   }
   .card-back-intro {
     font-size: 0.85rem;
