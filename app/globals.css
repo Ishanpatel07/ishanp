@@ -402,17 +402,16 @@ a {
 
 /* ============================================================
    BLOOD-SPLATTER EASTER EGG
-   Procedural SVG blood splatter: smooth bezier-curved irregular
-   blobs (not straight-line polygons), a dual-layer wet-halo +
-   clotted-core per splat with a multi-stop color ramp, satellite
-   droplets, tapered cast-off streaks, specular wet sheen on the
-   larger splats, and drips that reveal top-down over ~1.5s on
-   activation. multiply blend mode plus a tight feathered bleed so
-   it reads as soaked into the card stock, not pasted on top.
+   Procedural SVG blood splatter matched directly to a reference
+   image: dozens of independent organic-edged droplets scattered
+   across the whole viewport, sizes ranging from tiny pinpoints to
+   a handful of medium blobs, bright saturated red. multiply blend
+   mode plus a tight feathered bleed so each droplet reads as
+   slightly absorbed into the card stock, not pasted flat on top.
    Purely visual: no text, sound, or hint attached. pointer-events:
    none on the whole layer keeps every link fully clickable
-   underneath it, and streaks/droplets are kept out of the name,
-   focus line, link row, and corner text via a safe-zone check.
+   underneath it, and droplets are kept out of the name, focus
+   line, link row, and corner text via a safe-zone check.
    ============================================================ */
 .blood-layer {
   position: fixed;
@@ -423,27 +422,6 @@ a {
 .blood-svg {
   width: 100%;
   height: 100%;
-}
-
-@keyframes blood-drip-reveal {
-  0% {
-    clip-path: inset(0 0 100% 0);
-  }
-  100% {
-    clip-path: inset(0 0 0% 0);
-  }
-}
-.blood-drip-animated {
-  animation: blood-drip-reveal 1.5s cubic-bezier(0.3, 0.6, 0.4, 1) forwards;
-}
-.blood-drip-static {
-  clip-path: inset(0 0 0% 0);
-}
-@media (prefers-reduced-motion: reduce) {
-  .blood-drip-animated {
-    animation: none;
-    clip-path: inset(0 0 0% 0);
-  }
 }
 
 /* ============================================================
