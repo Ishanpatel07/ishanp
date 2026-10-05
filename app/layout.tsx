@@ -27,10 +27,22 @@ const vollkornSC = Vollkorn_SC({
 
 // Stage 1 placeholder. Final title/description (2 options each) are chosen
 // with the user in Stage 2 and land in data/content.ts.
+// Declaring an icons object replaces Next's file-convention detection
+// rather than adding to it, so app/apple-icon.png has to be listed here
+// explicitly: without it the apple-touch-icon link is simply never
+// emitted. app/favicon.ico is still picked up on its own.
 export const metadata: Metadata = {
   title: "Ishan Patel",
   description: "Computer vision and edge ML engineer heading into AI security.",
   metadataBase: new URL("https://ishanp.me"),
+  manifest: "/site.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+  },
 };
 
 // Without this, mobile browsers render at a ~980px virtual width and scale

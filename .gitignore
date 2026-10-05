@@ -43,3 +43,6 @@ next-env.d.ts
 # local editor/tooling instruction files, not part of the site
 *.md
 !README.md
+
+# favicon source pack; the generated icons live in app/ and public/
+favicon_io/
