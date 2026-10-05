@@ -29,19 +29,27 @@ html {
 body {
   background-color: var(--paper);
   /* Layered background, first-listed paints on top:
-     1. Paper-fiber grain: an inline SVG turbulence filter as a data: URI
+     1. A watermark: two marks per tile. Rotation angles are not arbitrary:
+        210deg is where a clock's hour hand points at 10 o'clock, 60deg is
+        where the minute hand points at 25 minutes past. Random-feeling but
+        derived from a precise, symmetric reference rather than eyeballed
+        numbers. Subtle enough to notice on a closer look, not read as a
+        pattern. Listed first (on top) so the grain layer below doesn't
+        wash it out.
+     2. Paper-fiber grain: an inline SVG turbulence filter as a data: URI
         (covered by the CSP's img-src 'self' data:), tuned to read as
         directional cotton-fiber texture rather than uniform digital noise.
-     2. A soft pale-nimbus radial glow centered on the viewport, so the
+     3. A soft pale-nimbus radial glow centered on the viewport, so the
         stock reads as gently luminous toward the middle rather than a
         flat, single-tone fill.
      All data: URIs or gradients, no remote image, no CSP change needed. */
   background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='1000'%3E%3Ctext x='250' y='320' font-family='Georgia,serif' font-size='170' fill='rgba(56,51,44,0.022)' text-anchor='middle' transform='rotate(210 250 320)'%3EIP%3C/text%3E%3Ctext x='700' y='760' font-family='Georgia,serif' font-size='140' fill='rgba(56,51,44,0.016)' text-anchor='middle' transform='rotate(60 700 760)'%3EIP%3C/text%3E%3C/svg%3E"),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.01 1.1' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.22 0 0 0 0 0.2 0 0 0 0 0.17 0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
     radial-gradient(ellipse at 50% 42%, var(--paper-nimbus) 0%, var(--paper) 72%);
-  background-size: 320px 320px, 100% 100%;
-  background-repeat: repeat, no-repeat;
-  background-attachment: scroll, fixed;
+  background-size: 1000px 1000px, 320px 320px, 100% 100%;
+  background-repeat: repeat, repeat, no-repeat;
+  background-attachment: scroll, scroll, fixed;
   color: var(--ink);
   font-family: var(--font-vollkorn), Georgia, "Times New Roman", serif;
   font-size: 18px;
@@ -334,26 +342,62 @@ a {
 
 /* ============================================================
    RED-OUT EASTER EGG
-   3 clicks on an invisible bottom-right corner hit-target fills
-   the whole viewport with flat solid red; the next click resets
-   it. No visible label, no tooltip, no hint anywhere: entirely
-   undiscoverable except by clicking in that corner. Not in the
-   tab order (tabIndex={-1}) so it doesn't surface itself to
-   keyboard users either. pointer-events: none on the red layer
-   keeps every link and button fully clickable underneath it, and
-   text stays visible since the layer is semi-transparent.
+   Small, quiet, bottom-right corner text. Not selectable (so a
+   triple-click doesn't select the text instead of just firing
+   the click handler), no visible affordance beyond normal link
+   hover. Three clicks flood the whole viewport with flat solid
+   red; the next click resets it. A hover tooltip hints at the
+   interaction without naming what it does.
    ============================================================ */
-.card-corner-trigger {
+.card-corner-trigger-wrap {
   position: absolute;
   bottom: 3.5vw;
   right: 6vw;
-  width: 1.5rem;
-  height: 1.5rem;
-  transform: translate(50%, 50%);
+}
+.card-corner-trigger {
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  opacity: 0.55;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
   background: transparent;
   border: none;
   padding: 0;
-  cursor: default;
+}
+.card-corner-trigger:hover {
+  opacity: 0.85;
+}
+.card-corner-trigger:focus-visible {
+  outline: 1px solid var(--ink-soft);
+  outline-offset: 3px;
+}
+
+.card-corner-tooltip {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 0.5em;
+  font-size: 0.68rem;
+  font-style: italic;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  pointer-events: none;
+}
+.card-corner-trigger-wrap:hover .card-corner-tooltip,
+.card-corner-trigger:focus-visible ~ .card-corner-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 640px) {
+  .card-corner-trigger-wrap {
+    display: none;
+  }
 }
 
 .red-out-layer {
