@@ -30,7 +30,7 @@ export function CardFront({
   onFlip: () => void;
   inert: boolean;
 }) {
-  const { redOut } = useEasterEggs();
+  const { bloodSplatter } = useEasterEggs();
 
   return (
     <div className="card-panel" inert={inert || undefined}>
@@ -44,7 +44,7 @@ export function CardFront({
         <button
           type="button"
           className="card-corner-trigger"
-          onClick={redOut.trigger}
+          onClick={bloodSplatter.trigger}
           aria-label="hidden detail"
           tabIndex={-1}
         >
