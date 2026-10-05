@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Vollkorn, Vollkorn_SC } from "next/font/google";
 import "./globals.css";
+import { RotateGate } from "@/components/RotateGate";
 
 // Self-hosted via next/font (downloaded at build time, served same-origin),
 // so this satisfies the CSP's font-src 'self' with no extra directive.
@@ -32,6 +33,15 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://ishanp.me"),
 };
 
+// Without this, mobile browsers render at a ~980px virtual width and scale
+// the whole page down, which would shrink the card's type well below a
+// readable size on a phone.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
@@ -39,7 +49,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${vollkorn.variable} ${vollkornSC.variable} h-full`}
       style={{ colorScheme: "light" }}
     >
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        <div className="paper-watermark" aria-hidden="true">
+          <span className="wm-one">IP</span>
+          <span className="wm-two">IP</span>
+        </div>
+        <RotateGate />
+        {children}
+      </body>
     </html>
   );
 }

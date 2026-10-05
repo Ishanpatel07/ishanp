@@ -29,30 +29,24 @@ html {
 body {
   background-color: var(--paper);
   /* Layered background, first-listed paints on top:
-     1. A watermark: two marks, one above and one below the name (which
-        sits at viewport center), each at its own small random upright
-        tilt. A single non-repeating image, fixed to the viewport so the
-        marks stay anchored relative to the name regardless of scroll.
-        Sized as a square (not 100% 100%) so the 1000x1000 artboard keeps
-        its aspect ratio: stretching it to a wide viewport was smearing
-        the glyphs horizontally and making them read far too wide.
-        Listed first (on top) so the grain layer below doesn't wash it
-        out.
-     2. Paper-fiber grain: an inline SVG turbulence filter as a data: URI
+     1. Paper-fiber grain: an inline SVG turbulence filter as a data: URI
         (covered by the CSP's img-src 'self' data:), tuned to read as
         directional cotton-fiber texture rather than uniform digital noise.
-     3. A soft pale-nimbus radial glow centered on the viewport, so the
+     2. A soft pale-nimbus radial glow centered on the viewport, so the
         stock reads as gently luminous toward the middle rather than a
         flat, single-tone fill.
+     The watermark is NOT a background layer here: it needs to sit at
+     exact percentages of the viewport's width and height independently,
+     which a single square background image can't do on a wide screen
+     without either stretching the glyphs or pulling them toward center.
+     It lives on .paper-watermark instead.
      All data: URIs or gradients, no remote image, no CSP change needed. */
   background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='1000'%3E%3Ctext x='300' y='210' font-family='Georgia,serif' font-size='165' fill='rgba(56,51,44,0.045)' text-anchor='middle' transform='rotate(-4.2 300 210)'%3EIP%3C/text%3E%3Ctext x='680' y='760' font-family='Georgia,serif' font-size='150' fill='rgba(56,51,44,0.04)' text-anchor='middle' transform='rotate(-8.4 680 760)'%3EIP%3C/text%3E%3C/svg%3E"),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.01 1.1' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.22 0 0 0 0 0.2 0 0 0 0 0.17 0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
     radial-gradient(ellipse at 50% 42%, var(--paper-nimbus) 0%, var(--paper) 72%);
-  background-size: 100svh 100svh, 320px 320px, 100% 100%;
-  background-position: center center, 0 0, 0 0;
-  background-repeat: no-repeat, repeat, no-repeat;
-  background-attachment: fixed, scroll, fixed;
+  background-size: 320px 320px, 100% 100%;
+  background-repeat: repeat, no-repeat;
+  background-attachment: scroll, fixed;
   color: var(--ink);
   font-family: var(--font-vollkorn), Georgia, "Times New Roman", serif;
   font-size: 18px;
@@ -81,6 +75,46 @@ body::before {
   body {
     font-size: 17px;
   }
+}
+
+/* ============================================================
+   WATERMARK
+   Two "IP" marks pressed into the stock, mirrored about the
+   center of the viewport: upper-left at 11%/36%, lower-right at
+   89%/64%. A fixed overlay rather than a body background layer,
+   so each mark can be placed at its own percentage of width AND
+   height: a single background image can only be positioned as one
+   unit, which on a wide screen either stretches the glyphs or
+   drags them toward the middle. Each mark keeps a small upright
+   tilt so the pair doesn't read as mechanically placed.
+   Behind everything (z-index 0 against the card's own stacking)
+   and pointer-events: none, so it never intercepts a click.
+   ============================================================ */
+.paper-watermark {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.paper-watermark span {
+  position: absolute;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(5rem, 11vw, 11rem);
+  line-height: 1;
+  color: rgba(56, 51, 44, 0.11);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.paper-watermark .wm-one {
+  left: 11%;
+  top: 36%;
+  transform: translate(-50%, -50%) rotate(-4.2deg);
+}
+.paper-watermark .wm-two {
+  left: 89%;
+  top: 64%;
+  transform: translate(-50%, -50%) rotate(-8.4deg);
 }
 
 h1, h2, h3 {
@@ -367,13 +401,138 @@ a {
 }
 
 /* ============================================================
-   MOBILE RESTACK (< 640px)
-   Same four pieces, restacked vertically inside 100svh: email at
-   top, university under it, name/focus centered, links at the
-   bottom (wrapping to two lines if needed). No shrinking text
-   below readable sizes to force a fit.
+   ROTATE GATE (phones in portrait)
+   The card is a wide composition: four corners plus a centered
+   name. In a tall, narrow phone viewport it either shrinks below
+   a readable size or loses that composition entirely, so phones
+   in portrait get a short "turn your phone" message instead.
+
+   Scoped with (pointer: coarse) so this only ever applies to
+   touch devices, never a narrow desktop window. The min-aspect-
+   ratio landscape query then hides the gate and restores the
+   card. Hidden by default so every non-phone context (desktop,
+   tablet, print) renders the card with no extra overrides.
    ============================================================ */
-@media (max-width: 640px) {
+.rotate-gate {
+  display: none;
+}
+
+@media (orientation: portrait) and (pointer: coarse) and (max-width: 767px) {
+  .rotate-gate {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.1rem;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    padding: 2rem 2.5rem;
+    text-align: center;
+  }
+  /* The card is removed from the a11y tree and the tab order too, not
+     just visually hidden, so a screen reader in portrait reads the
+     rotate message rather than a card the user can't see. */
+  .card-flip-stage {
+    display: none;
+  }
+  .paper-watermark {
+    display: none;
+  }
+}
+
+.rotate-gate-mark {
+  margin: 0;
+  font-size: 2.6rem;
+  letter-spacing: 0.12em;
+  color: var(--ink);
+}
+.rotate-gate-text {
+  margin: 0;
+  font-size: 1.05rem;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+}
+.rotate-gate-sub {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  max-width: 24ch;
+}
+
+/* ============================================================
+   PHONE, LANDSCAPE
+   Phones that have been turned sideways: the full four-corner
+   card layout is kept (that's the whole point of gating portrait),
+   but the vertical rhythm is tightened and the name is scaled off
+   viewport height rather than width, since a landscape phone is
+   very wide relative to how short it is.
+   ============================================================ */
+/* Touch targets: the card's links are small by design (that's the
+   letterpress register), and on a phone they render ~23px tall, under the
+   44px minimum for a comfortable tap. Rather than enlarge the type and
+   break the composition, each link grows an invisible centered hit area
+   via a pseudo-element, so what's tappable is 44px tall while what's
+   visible is unchanged. Only on coarse pointers: a mouse doesn't need it,
+   and the larger boxes would otherwise overlap. */
+@media (pointer: coarse) {
+  .card-link,
+  .card-affordance {
+    position: relative;
+  }
+  .card-link::after,
+  .card-affordance::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    min-height: 44px;
+    height: 100%;
+  }
+}
+
+@media (orientation: landscape) and (pointer: coarse) and (max-height: 500px) {
+  .card-panel {
+    padding: 3vh 5vw 3vh;
+  }
+  .card-corner-tl,
+  .card-corner-tr {
+    top: 3vh;
+  }
+  .card-name {
+    font-size: clamp(1.9rem, 9vh, 3.2rem);
+  }
+  .card-focus-line {
+    font-size: clamp(0.72rem, 3.4vh, 0.95rem);
+  }
+  .card-center {
+    gap: 0.5rem;
+  }
+  .card-link-row {
+    font-size: 0.8rem;
+  }
+  .card-corner-note {
+    bottom: 2vh;
+    right: 5vw;
+    font-size: 0.6rem;
+  }
+  .card-back-intro {
+    font-size: 0.85rem;
+    line-height: 1.55;
+  }
+}
+
+/* ============================================================
+   NARROW SCREENS (non-phone, e.g. a small window or tablet)
+   These are never gated, so the four-part layout restacks
+   vertically inside 100svh instead: email at top, university
+   under it, name/focus centered, links at the bottom. No
+   shrinking text below readable sizes to force a fit.
+   ============================================================ */
+@media (max-width: 640px) and (orientation: portrait) {
   .card-panel {
     padding: 7vw 6vw 8vw;
     display: flex;
