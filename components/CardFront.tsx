@@ -30,7 +30,7 @@ export function CardFront({
   onFlip: () => void;
   inert: boolean;
 }) {
-  const { inkSpatter } = useEasterEggs();
+  const { redOut } = useEasterEggs();
 
   return (
     <div className="card-panel" inert={inert || undefined}>
@@ -40,20 +40,13 @@ export function CardFront({
         </a>
       </div>
 
-      <div className="card-corner-trigger-wrap">
-        <button
-          type="button"
-          className="card-corner-trigger"
-          onClick={inkSpatter.trigger}
-          aria-label="hidden detail"
-          tabIndex={-1}
-        >
-          Inspired by American Psycho
-        </button>
-        <span className="card-corner-tooltip" aria-hidden="true">
-          Click thrice for a surprise
-        </span>
-      </div>
+      <button
+        type="button"
+        className="card-corner-trigger"
+        onClick={redOut.trigger}
+        aria-label="hidden detail"
+        tabIndex={-1}
+      />
 
       <div className="card-corner card-corner-tr">
         <div className="small-caps deboss" style={{ textAlign: "right", lineHeight: 1.4 }}>
