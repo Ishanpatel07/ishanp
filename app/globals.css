@@ -282,6 +282,14 @@ a {
 .card-corner-tl { left: 6vw; }
 .card-corner-tr { right: 6vw; }
 
+/* In CSS rather than an inline style on the element, so the narrow-screen
+   restack below can re-center it. An inline style would win on
+   specificity and leave it stuck right-aligned. */
+.card-corner-tr-text {
+  text-align: right;
+  line-height: 1.4;
+}
+
 .card-center {
   grid-row: 2;
   display: flex;
@@ -439,6 +447,20 @@ a {
   .paper-watermark {
     display: none;
   }
+
+  /* Escape hatch: someone with rotation lock on can't turn the page
+     sideways, so "View anyway" puts this class on <html> and the card
+     comes back in portrait. These selectors are inside the same media
+     query, so the class is inert on desktop and in landscape. */
+  .rotate-gate-dismissed .rotate-gate {
+    display: none;
+  }
+  .rotate-gate-dismissed .card-flip-stage {
+    display: block;
+  }
+  .rotate-gate-dismissed .paper-watermark {
+    display: block;
+  }
 }
 
 .rotate-gate-mark {
@@ -459,6 +481,21 @@ a {
   line-height: 1.6;
   color: var(--ink-soft);
   max-width: 24ch;
+}
+/* Quieter than the message above it: this is the fallback, not the
+   thing most visitors should take. */
+.rotate-gate-anyway {
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid transparent;
+  padding: 0.2rem 0;
+  cursor: pointer;
+}
+.rotate-gate-anyway:hover {
+  border-bottom-color: var(--ink-soft);
 }
 
 /* ============================================================
@@ -532,7 +569,7 @@ a {
    under it, name/focus centered, links at the bottom. No
    shrinking text below readable sizes to force a fit.
    ============================================================ */
-@media (max-width: 640px) and (orientation: portrait) {
+@media (max-width: 767px) and (orientation: portrait) {
   .card-panel {
     padding: 7vw 6vw 8vw;
     display: flex;
@@ -544,8 +581,11 @@ a {
     position: static;
     text-align: center;
   }
-  .card-corner-tr > div {
+  .card-corner-tr-text {
     text-align: center;
+  }
+  .card-corner-tr {
+    margin-top: 0.6rem;
   }
   .card-center {
     flex: 1;

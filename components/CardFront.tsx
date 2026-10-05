@@ -40,7 +40,7 @@ export function CardFront({
       <p className="card-corner-note">Inspired by American Psycho</p>
 
       <div className="card-corner card-corner-tr">
-        <div className="small-caps deboss" style={{ textAlign: "right", lineHeight: 1.4 }}>
+        <div className="small-caps deboss card-corner-tr-text">
           <div>{person.university}</div>
           <div>{person.major}</div>
         </div>
