@@ -48,7 +48,18 @@ export function CardFront({
 
       <div className="card-center">
         <h1 className="small-caps deboss card-name">{person.name}</h1>
-        <p className="small-caps deboss card-focus-line">{focusLine}</p>
+        <p className="small-caps deboss card-focus-line">
+          {focusLine.before}
+          <a
+            href={focusLine.linkHref}
+            className="card-link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {focusLine.linkLabel}
+          </a>
+          {focusLine.after}
+        </p>
       </div>
 
       <div className="card-bottom">

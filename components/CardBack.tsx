@@ -1,15 +1,15 @@
 "use client";
 
 import { RefObject } from "react";
-import { introText, currentlyLine, cardBackLinks } from "@/data/content";
+import { introText, cardBackLinks } from "@/data/content";
 
 /* ============================================================
    CardBack
-   Centered intro and Currently line in the middle zone. The
-   contact link row sits in the same grid row (and therefore the
-   same on-screen position) as the front's primary link row, with
-   "Turn back" beneath it in the same spot "Turn over" occupies
-   on the front. Same paper, same margins as the front.
+   Centered intro in the middle zone. The contact link row sits in
+   the same grid row (and therefore the same on-screen position)
+   as the front's primary link row, with "Turn back" beneath it in
+   the same spot "Turn over" occupies on the front. Same paper,
+   same margins as the front.
    ============================================================ */
 
 export function CardBack({
@@ -25,7 +25,6 @@ export function CardBack({
     <div className="card-panel card-panel-back" inert={inert || undefined}>
       <div className="card-back-content">
         <p className="card-back-intro">{introText}</p>
-        <p className="small-caps card-back-currently">{currentlyLine}</p>
       </div>
 
       <div className="card-bottom card-bottom-back">

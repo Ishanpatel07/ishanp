@@ -380,10 +380,6 @@ a {
   line-height: 1.7;
   margin: 0;
 }
-.card-back-currently {
-  font-size: clamp(0.85rem, 1.3vw, 1rem);
-  margin: 0;
-}
 .card-bottom-back {
   grid-row: 3;
   align-self: end;

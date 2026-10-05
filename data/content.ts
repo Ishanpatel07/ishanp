@@ -14,18 +14,20 @@ export const person = {
   major: "Computer Information Systems",
 };
 
-// Confirmed with the user: no "AI security" framing in the focus line, since
-// that's a direction, not current expertise or a credential held today.
-export const focusLine = "Cybersecurity student. Building with ML and computer vision.";
+// Split into parts because "Progsu" is a link: the line can't be a single
+// string if part of it has to render as an anchor.
+export const focusLine = {
+  before: "CFO @ ",
+  linkLabel: "Progsu",
+  linkHref: "https://progsu.com",
+  after: "",
+};
 
-export const currentlyLine = "Running finance for Hacklanta II (Oct 9-11).";
-
-// Stage 2 will present 3 intro options; this is a placeholder for Stage 1's
-// layout only. AI security appears once here, explicitly framed as a
-// long-term goal ("eventually"), not present-tense work or expertise,
-// per the user's correction.
+// AI security appears once here, explicitly framed as a long-term goal
+// ("long term"), not present-tense work or expertise, per the user's
+// standing correction.
 export const introText =
-  "I build computer vision and edge ML systems that run on real hardware, and I run finance for a 1,000-plus person hackathon. Eventually, I want to move into AI security: how models fail, how they're attacked, and how to make them robust.";
+  "I study Information Systems with a concentration in cybersecurity at Georgia State. This summer I built computer vision tools and got ML models running on Raspberry Pis as an AI/ML intern. I'm also CFO of PROGSU, our programming club, and I run the budget for Hacklanta. Long term, I want to work on AI security: how models fail, and how to make them harder to break.";
 
 export const cardFrontLinks = [
   { label: "Resume", href: "/Ishan_Patel_Resume.pdf" },
