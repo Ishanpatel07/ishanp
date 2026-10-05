@@ -5,14 +5,22 @@ import { useMemo } from "react";
 /* ============================================================
    BloodSplatter
 
-   Rebuilt to match a reference image directly: dozens of
-   independent droplets scattered across the whole surface, sizes
-   ranging from tiny pinpoints to medium blobs, bright saturated
-   red, each one its own organic shape. No halo/core pairing, no
-   directional spray clusters, no cast-off streaks, no drips: that
-   composite "impact splash" model (from an earlier round) doesn't
-   match what a scattered rain of droplets actually looks like, so
-   it's gone rather than kept alongside this.
+   Dozens of independent droplets scattered across the whole
+   surface, sizes ranging from tiny pinpoints to medium blobs.
+   An earlier version of this file jittered every vertex of a
+   small polygon loosely, which produced lumpy, warped "stain"
+   silhouettes rather than droplets. This version gives each
+   droplet a clean, mostly-circular body (tight wobble, more
+   vertices) with exactly one tail pulled out in a single random
+   direction, the way a real drop still has a tiny bit of momentum
+   when it lands, plus a radial gradient per droplet (darker,
+   richer core fading to a brighter thin edge) instead of one flat
+   fill, and a couple of tiny satellite specks near the larger
+   droplets, the way a drop throws a little fine spatter as it
+   hits. No halo/core pairing, no directional spray clusters, no
+   cast-off streaks, no drips: that composite "impact splash"
+   model (from an earlier round) doesn't match a scattered rain of
+   droplets, so it stays gone.
 
    Procedural SVG (not photos): no external assets to source or
    license, full control over seeded randomness and keeping
@@ -43,20 +51,29 @@ function pointInAnySafeZone(x: number, y: number, margin: number): boolean {
   return SAFE_ZONES.some((z) => x + margin >= z.x1 && x - margin <= z.x2 && y + margin >= z.y1 && y - margin <= z.y2);
 }
 
-/** A small irregular organic blob: a jittered closed curve through
- * Catmull-Rom-derived bezier segments, with a couple of vertices pulled
- * out further to break the outline the way a real droplet's edge does
- * (droplets aren't clean circles, even small ones have a slight tail or
- * lobed edge where they landed and spread). */
+/** A droplet silhouette close to a real blood drop's actual physics: mostly
+ * a clean, near-circular body (high vertex count, tight wobble range so the
+ * outline reads as smooth, not lumpy), with ONE small tail pulled out to one
+ * side where the drop was still moving when it landed, tapering to a point.
+ * This replaces an earlier version that jittered every vertex loosely with
+ * few points, which produced a warped, lumpy "stain" silhouette rather than
+ * a droplet with a clean body and a single directional tail. */
 function buildDropletPath(rng: () => number, r: number): string {
-  const vertexCount = 7 + Math.floor(rng() * 4);
+  const vertexCount = 16 + Math.floor(rng() * 6);
   const pts: { x: number; y: number }[] = [];
-  const tailIndex = Math.floor(rng() * vertexCount);
+  const tailAngle = rng() * Math.PI * 2;
+  const tailWidth = 0.5 + rng() * 0.35; // radians either side of tailAngle affected
+
   for (let i = 0; i < vertexCount; i++) {
     const angle = (i / vertexCount) * Math.PI * 2;
-    const isTail = i === tailIndex;
-    const wobble = 0.78 + rng() * 0.4;
-    const rad = isTail ? r * (1.3 + rng() * 0.5) : r * wobble;
+    let angleDiff = Math.abs(angle - tailAngle);
+    if (angleDiff > Math.PI) angleDiff = Math.PI * 2 - angleDiff;
+    const tailInfluence = Math.max(0, 1 - angleDiff / tailWidth);
+    // Tight wobble on the body (reads as smooth, not lumpy), a longer
+    // pull only right at the tail's own angle.
+    const bodyWobble = 0.93 + rng() * 0.1;
+    const tailPull = tailInfluence > 0 ? tailInfluence * tailInfluence * (0.9 + rng() * 0.6) : 0;
+    const rad = r * (bodyWobble + tailPull);
     pts.push({ x: Math.cos(angle) * rad, y: Math.sin(angle) * rad });
   }
   const n = pts.length;
@@ -75,6 +92,12 @@ function buildDropletPath(rng: () => number, r: number): string {
   return d + "Z";
 }
 
+interface Speck {
+  x: number;
+  y: number;
+  r: number;
+}
+
 interface Droplet {
   id: string;
   x: number;
@@ -82,15 +105,24 @@ interface Droplet {
   r: number;
   path: string;
   rotation: number;
-  colorIndex: number;
+  gradientId: string;
+  specks: Speck[];
 }
 
-const REDS = ["#c01414", "#b01010", "#9c0e0e", "#a81212"];
+// Each entry is [core, mid, edge]: darker, richer at the center where the
+// liquid pools thickest, lighter and more translucent-reading at the thin
+// outer edge, rather than one flat saturated fill across the whole shape.
+const GRADIENT_STOPS: [string, string, string][] = [
+  ["#5c0606", "#9c0f0f", "#c21818"],
+  ["#4e0505", "#8e0d0d", "#b81414"],
+  ["#550505", "#95100f", "#be1616"],
+  ["#480404", "#860c0c", "#b11212"],
+];
 
 function buildDroplets(seed: number): Droplet[] {
   const rng = mulberry32(seed * 2654435761 + 1);
   const droplets: Droplet[] = [];
-  const target = 55;
+  const target = 48;
   let attempts = 0;
   let id = 0;
 
@@ -109,9 +141,9 @@ function buildDroplets(seed: number): Droplet[] {
       r = 1.9 + rng() * 2.2; // occasional larger blob
     }
 
-    // Keep the droplet's full footprint (including its longest tail
-    // spike, up to ~1.8x r) inside the viewport, not just its center.
-    const edgeClear = r * 1.8;
+    // Keep the droplet's full footprint (including its tail) inside the
+    // viewport, not just its center.
+    const edgeClear = r * 1.7;
     const x = edgeClear + rng() * (100 - edgeClear * 2);
     const y = edgeClear + rng() * (100 - edgeClear * 2);
 
@@ -121,6 +153,22 @@ function buildDroplets(seed: number): Droplet[] {
     const dropRng = mulberry32(Math.floor(x * 92821) ^ Math.floor(y * 68917) ^ seed ^ id);
     const path = buildDropletPath(dropRng, r);
 
+    // Larger droplets get a couple of tiny satellite specks nearby, the
+    // way a real drop throws a little fine spatter as it lands.
+    const specks: Speck[] = [];
+    if (r > 1.1) {
+      const speckCount = Math.floor(dropRng() * 3);
+      for (let sp = 0; sp < speckCount; sp++) {
+        const angle = dropRng() * Math.PI * 2;
+        const dist = r * (1.3 + dropRng() * 1.4);
+        const sx = x + Math.cos(angle) * dist;
+        const sy = y + Math.sin(angle) * dist;
+        if (sx < 0.5 || sx > 99.5 || sy < 0.5 || sy > 99.5) continue;
+        if (pointInAnySafeZone(sx, sy, 0.8)) continue;
+        specks.push({ x: sx, y: sy, r: 0.12 + dropRng() * 0.18 });
+      }
+    }
+
     droplets.push({
       id: `d${id}`,
       x,
@@ -128,7 +176,8 @@ function buildDroplets(seed: number): Droplet[] {
       r,
       path,
       rotation: rng() * 360,
-      colorIndex: Math.floor(rng() * REDS.length),
+      gradientId: `blood-grad-${Math.floor(rng() * GRADIENT_STOPS.length)}`,
+      specks,
     });
     id++;
   }
@@ -150,23 +199,35 @@ export function BloodSplatter({ seed }: { seed: number }) {
           <filter id="blood-bleed" x="-120%" y="-120%" width="340%" height="340%">
             <feGaussianBlur stdDeviation="0.45" />
           </filter>
+          {GRADIENT_STOPS.map(([core, mid, edge], i) => (
+            <radialGradient key={`blood-grad-${i}`} id={`blood-grad-${i}`} cx="42%" cy="38%" r="65%">
+              <stop offset="0%" stopColor={core} />
+              <stop offset="55%" stopColor={mid} />
+              <stop offset="100%" stopColor={edge} />
+            </radialGradient>
+          ))}
         </defs>
 
         {/* Bleed: a soft, tight feathered underlay so each droplet reads as
             slightly absorbed into the paper fiber, not pasted flat on top. */}
-        <g style={{ mixBlendMode: "multiply" }} filter="url(#blood-bleed)" opacity={0.35}>
+        <g style={{ mixBlendMode: "multiply" }} filter="url(#blood-bleed)" opacity={0.32}>
           {droplets.map((d) => (
-            <circle key={`bleed-${d.id}`} cx={d.x} cy={d.y} r={d.r * 1.1} fill="#8a0a0a" />
+            <circle key={`bleed-${d.id}`} cx={d.x} cy={d.y} r={d.r * 1.05} fill="#7a0909" />
           ))}
         </g>
 
         {droplets.map((d) => (
-          <g
-            key={d.id}
-            style={{ mixBlendMode: "multiply" }}
-            transform={`translate(${d.x} ${d.y}) rotate(${d.rotation})`}
-          >
-            <path d={d.path} fill={REDS[d.colorIndex]} opacity={0.94} />
+          <g key={d.id}>
+            <g style={{ mixBlendMode: "multiply" }} transform={`translate(${d.x} ${d.y}) rotate(${d.rotation})`}>
+              <path d={d.path} fill={`url(#${d.gradientId})`} opacity={0.95} />
+            </g>
+            {d.specks.length > 0 && (
+              <g style={{ mixBlendMode: "multiply" }} opacity={0.85}>
+                {d.specks.map((sp, i) => (
+                  <circle key={i} cx={sp.x} cy={sp.y} r={sp.r} fill="#8e0d0d" />
+                ))}
+              </g>
+            )}
           </g>
         ))}
       </svg>
